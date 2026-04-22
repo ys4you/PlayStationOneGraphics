@@ -1,0 +1,25 @@
+@"
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+Saved/
+
+# IDE
+.vs/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+
+# OS
+Thumbs.db
+.DS_Store
+"@ | Out-File -Encoding utf8 .gitignore

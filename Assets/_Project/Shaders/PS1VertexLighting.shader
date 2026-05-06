@@ -1,5 +1,6 @@
 // PS1VertexLighting.shader
 // Recreates PS1 per-vertex lighting (Gouraud and flat shading).
+// Uses PS1VertexLighting.hlsl for the lighting calculation.
 // Requires Forward rendering path (not Forward+).
 
 Shader "PS1/PS1VertexLighting"
@@ -36,7 +37,7 @@ Shader "PS1/PS1VertexLighting"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "Includes/PS1VertexLighting.hlsl"
 
             struct Attributes
             {
@@ -75,24 +76,7 @@ Shader "PS1/PS1VertexLighting"
                 float3 worldNormal = TransformObjectToWorldNormal(IN.normalOS);
                 float3 worldPos = TransformObjectToWorld(IN.positionOS.xyz);
 
-                // Main directional light
-                Light mainLight = GetMainLight();
-                half NdotL = saturate(dot(worldNormal, mainLight.direction));
-                half3 diffuse = mainLight.color * NdotL;
-
-                // Ambient from spherical harmonics
-                half3 ambient = SampleSH(worldNormal);
-
-                // Additional lights (point, spot) - all per-vertex
-                uint additionalLightsCount = GetAdditionalLightsCount();
-                for (uint i = 0u; i < additionalLightsCount; ++i)
-                {
-                    Light additionalLight = GetAdditionalLight(i, worldPos);
-                    half addNdotL = saturate(dot(worldNormal, additionalLight.direction));
-                    diffuse += additionalLight.color * addNdotL * additionalLight.distanceAttenuation;
-                }
-
-                OUT.vertexLighting = ambient + diffuse;
+                OUT.vertexLighting = PS1ComputeVertexLighting(worldPos, worldNormal);
 
                 return OUT;
             }
